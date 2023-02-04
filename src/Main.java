@@ -26,10 +26,12 @@ public class Main {
 
         System.out.println("round_list = " + round_list);
 
-        List<int[]> bracket_list = new ArrayList<>();
+        List<List<int[]>> bracket_list = new ArrayList<>();
         bracket_list = getBracket(round_list, player_count);
 
         System.out.println("bracket_list = " + bracket_list.size());
+
+        System.out.println(checkBracketValidity(bracket_list.get(0)));
 
 
 
@@ -65,12 +67,16 @@ public class Main {
         return comb;
     }
 
-    public static List<int[]> getBracket(List<List<int[]>> rounds, int players) {
+    public static List<List<int[]>> getBracket(List<List<int[]>> rounds, int players) {
         Iterator<int[]> pairing_iterator = CombinatoricsUtils.combinationsIterator(rounds.get(0).size(), players - 1);
-        List<int[]> comb = new ArrayList<>();
+        List<List<int[]>> comb = new ArrayList<>();
         while (pairing_iterator.hasNext()) {
             final int[] combination = pairing_iterator.next();
-            comb.add(combination);
+            List<int[]> temp_bracket = new ArrayList<>();
+            for (int i = 0; i < rounds.size(); i++) {
+                temp_bracket.add(rounds.get(i).get(combination[i]));
+            }
+            comb.add(temp_bracket);
         }
         return comb;
     }
@@ -96,17 +102,42 @@ public class Main {
     }
 
     public static boolean checkBracketValidity(List<int[]> bracket) {
+        int len = bracket.get(0).length;
+        int[][] teammates = new int[len][len];
+        int[][] opponents = new int[len][len];
         for (int i =  0; i < bracket.get(0).length; i++) {
-            int[] teammates = new int[bracket.get(0).length];
-            int[] opponents = new int[bracket.get(0).length];
-
+            for (int k = 0; k < len; k++) {
+                teammates[k][k]++;
+                opponents[k][k] += 2;
+            }
             for (int[] round: bracket) {
-
+                for (int j = 0; j < round.length; j++) {
+                    if (j % 4 == 0) {
+                        teammates[j][round[j+1]]++;
+                        opponents[j][round[j+2]]++;
+                        opponents[j][round[j+3]]++;
+                    }
+                    if (j % 4 == 1) {
+                        teammates[j][round[j-1]]++;
+                        opponents[j][round[j+1]]++;
+                        opponents[j][round[j+2]]++;
+                    }
+                    if (j % 4 == 2) {
+                        teammates[j][round[j+1]]++;
+                        opponents[j][round[j-1]]++;
+                        opponents[j][round[j-2]]++;
+                    }
+                    if (j % 4 == 3) {
+                        teammates[j][round[j - 1]]++;
+                        opponents[j][round[j - 2]]++;
+                        opponents[j][round[j - 3]]++;
+                    }
+                }
             }
 
         }
 
-
+        return false;
     }
 
 }
